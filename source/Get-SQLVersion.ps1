@@ -1,21 +1,45 @@
 ﻿function Get-SQLVersion
-
 {
+    <#
+    .SYNOPSIS 
+    Obtains information from a computer about the version of SQL installed.
+
+    .DESCRIPTION
+    Obtains information from a computer about the version of SQL installed and reports back information in user friendly manner.
+
+    .PARAMETER Computername
+    Specifies the SQL Server database server name.
+
+    .PARAMETER SQLServer
+    Specifies the SQL Server database instance name.
+
+    .EXAMPLE
+    C:\PS> Get-SQLVersion -SQLServer .
+
+    ServicePack    : RTM
+    VersionNumber  : 12.0.2269.0
+    DisplayName    : SQL Server 2014 RTM Developer Edition (64-bit) 12.0.2269.0
+    Version        : Developer Edition (64-bit)
+    Name           : SQL Server 2014
+    PSComputerName : MyServer
+    RunspaceId     : 3d01b2fb-8e07-48f4-b63c-2ea8ddfff719
+
+    .LINK
+    http://www.powershell.amsterdam/2016/01/14/reporting-sql-server-version-information/
+    #>
+      
     [CmdletBinding()]
     [OutputType([psobject])]
     param
     (
-        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, HelpMessage = 'Computer name')] [string] $Computername = $env:computername,
-        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = 'Instance')] [string] $SQLServer
+        [Parameter(Mandatory = $false, ValueFromPipelineByPropertyName = $true, HelpMessage = 'SQL Server database server name')] [string] $Computername = $env:COMPUTERNAME,
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true, HelpMessage = 'SQL Server database instance name')] [string] $SQLServer
     )
-
+    
     Process
     {
         Invoke-Command -ComputerName $Computername -ScriptBlock {
-            $SQLquery = @'
-SELECT SERVERPROPERTY('productversion'), SERVERPROPERTY ('productlevel'), SERVERPROPERTY ('edition')
-'@
-
+            $SQLquery = "SELECT SERVERPROPERTY('productversion'), SERVERPROPERTY ('productlevel'), SERVERPROPERTY ('edition')"
             $SqlConnection = New-Object -TypeName System.Data.SqlClient.SqlConnection
             $SqlConnection.ConnectionString = "Server=$using:SQLServer;Database=Master;Integrated Security=SSPI;"
             $SqlCmd = New-Object -TypeName System.Data.SqlClient.SqlCommand
